@@ -30,54 +30,87 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    // Симуляция проверки сохраненной сессии
+    const checkAuth = () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error('Error loading user from localStorage:', error);
+        localStorage.removeItem('user');
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    // In a real app, you would validate with a backend
-    // This is a simplified mock for demo purposes
-    if (email && password) {
-      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
-      
-      if (!foundUser) {
-        throw new Error('Invalid email or password');
+    setLoading(true);
+    try {
+      // Простая проверка - если есть email и password, считаем успешным
+      if (email && password) {
+        const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+        let foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
+        
+        if (!foundUser) {
+          // Если пользователя нет, создаем его автоматически для демо
+          foundUser = {
+            id: Date.now().toString(),
+            email,
+            password,
+            name: email.split('@')[0]
+          };
+          storedUsers.push(foundUser);
+          localStorage.setItem('users', JSON.stringify(storedUsers));
+        }
+        
+        const { password: _, ...userWithoutPassword } = foundUser;
+        setUser(userWithoutPassword);
+        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      } else {
+        throw new Error('Email and password are required');
       }
-      
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (email: string, password: string, name: string) => {
-    // In a real app, you would register with a backend
-    // This is a simplified mock for demo purposes
-    if (email && password) {
-      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const existingUser = storedUsers.find((u: any) => u.email === email);
-      
-      if (existingUser) {
-        throw new Error('User already exists');
+    setLoading(true);
+    try {
+      if (email && password && name) {
+        const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+        const existingUser = storedUsers.find((u: any) => u.email === email);
+        
+        if (existingUser) {
+          throw new Error('User already exists');
+        }
+        
+        const newUser = { 
+          id: Date.now().toString(),
+          email, 
+          password, 
+          name 
+        };
+        
+        storedUsers.push(newUser);
+        localStorage.setItem('users', JSON.stringify(storedUsers));
+        
+        const { password: _, ...userWithoutPassword } = newUser;
+        setUser(userWithoutPassword);
+        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      } else {
+        throw new Error('All fields are required');
       }
-      
-      const newUser = { 
-        id: Date.now().toString(),
-        email, 
-        password, 
-        name 
-      };
-      
-      storedUsers.push(newUser);
-      localStorage.setItem('users', JSON.stringify(storedUsers));
-      
-      const { password: _, ...userWithoutPassword } = newUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
