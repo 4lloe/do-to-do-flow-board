@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Dashboard, List, Timer, Clock, Settings } from 'lucide-react';
+import { LayoutDashboard, List, Timer, Clock, Settings } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   return (
@@ -20,7 +20,7 @@ const Sidebar: React.FC = () => {
             }`
           }
         >
-          <Dashboard className="w-5 h-5 mr-3" />
+          <LayoutDashboard className="w-5 h-5 mr-3" />
           <span>Dashboard</span>
         </NavLink>
         
